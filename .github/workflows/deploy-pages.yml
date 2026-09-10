@@ -1,0 +1,71 @@
+name: Deploy Pages mirror
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: "Ветка/тег монорепо hse-law-alumni-club"
+        required: true
+        default: "codex/v3-backlog-polish"
+  schedule:
+    - cron: "0 */6 * * *"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          repository: Bogolubov-creator/hse-law-alumni-club
+          ref: ${{ github.event.inputs.source_ref || 'codex/v3-backlog-polish' }}
+          path: src
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: src/pnpm-lock.yaml
+
+      - name: Install and build mirror
+        working-directory: src
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @club/shared build
+          pnpm --filter @club/web build:mirror
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/apps/web/dist
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
