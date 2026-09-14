@@ -26,19 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout monorepo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           repository: Bogolubov-creator/hse-law-alumni-club
           ref: ${{ github.event.inputs.source_ref || 'codex/v3-backlog-polish' }}
           path: src
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6.1.0
         with:
           version: 9.12.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
           cache: pnpm
@@ -52,12 +52,13 @@ jobs:
           pnpm --filter @club/web build:mirror
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6.0.0
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: src/apps/web/dist
+          include-hidden-files: true
 
   deploy:
     needs: build
@@ -68,4 +69,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
