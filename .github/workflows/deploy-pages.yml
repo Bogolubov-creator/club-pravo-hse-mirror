@@ -8,7 +8,7 @@ on:
         required: true
         default: "codex/v3-backlog-polish"
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "17 * * * *"
   push:
     branches: [main]
 
@@ -49,6 +49,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @club/shared build
+          pnpm --filter @club/scripts exec tsx ../apps/web/scripts/sync-changes.ts --output ../apps/web/public/data/changes.json --previous-published
           pnpm --filter @club/web build:mirror
 
       - name: Setup Pages
