@@ -4,6 +4,8 @@
 
 - **Сайт:** https://bogolubov-creator.github.io/club-pravo-hse-mirror/
 - **Исходник:** [Bogolubov-creator/hse-law-alumni-club](https://github.com/Bogolubov-creator/hse-law-alumni-club) (`apps/web`, режим `VITE_MIRROR`)
-- **Документ:** [docs/pages-mirror.md](https://github.com/Bogolubov-creator/hse-law-alumni-club/blob/codex/v3-backlog-polish/docs/pages-mirror.md)
+- **Документ:** [docs/pages-mirror.md](https://github.com/Bogolubov-creator/hse-law-alumni-club/blob/main/docs/pages-mirror.md)
 
-На Pages нет API, кабинета, заявок и админки – только витрина с сидами каталога (аналог `publish-mirror` у сайта ДПО).
+На Pages есть витрины, демо-кабинет и демо-админка. Живого API и сохранения
+заявок или изменений нет; онлайн-оплата отключена. Обычная сборка берёт исходник
+из `main` монорепозитория.

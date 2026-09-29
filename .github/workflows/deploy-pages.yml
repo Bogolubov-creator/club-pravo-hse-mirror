@@ -6,7 +6,7 @@ on:
       source_ref:
         description: "Ветка/тег монорепо hse-law-alumni-club"
         required: true
-        default: "codex/v3-backlog-polish"
+        default: "main"
   schedule:
     - cron: "17 * * * *"
   push:
@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           repository: Bogolubov-creator/hse-law-alumni-club
-          ref: ${{ github.event.inputs.source_ref || 'codex/v3-backlog-polish' }}
+          ref: ${{ github.event.inputs.source_ref || 'main' }}
           path: src
 
       - name: Setup pnpm
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7.0.0
         with:
-          node-version: "22"
+          node-version: "24"
           cache: pnpm
           cache-dependency-path: src/pnpm-lock.yaml
 
