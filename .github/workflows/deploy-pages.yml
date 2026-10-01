@@ -38,26 +38,30 @@ jobs:
           git rev-parse HEAD > /tmp/mirror-source-revision
           printf 'Source commit: `%s`\n' "$(cat /tmp/mirror-source-revision)" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6.1.0
+      - name: Setup Python
+        uses: actions/setup-python@v7.0.0
         with:
-          version: 12.8.1
+          python-version: "3.14.7"
 
-      - name: Setup Node
-        uses: actions/setup-node@v7.0.0
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v10.2.0
         with:
-          node-version: "24.21.0"
-          cache: pnpm
-          cache-dependency-path: src/pnpm-lock.yaml
+          version: "0.12.21"
 
       - name: Install and build mirror
         working-directory: src
         run: |
-          pnpm install --frozen-lockfile
-          pnpm --filter @club/shared build
-          pnpm --filter @club/web exec tsx scripts/sync-changes.ts --output public/data/changes.json --previous-published
-          pnpm --filter @club/web build:mirror
-          node -e 'const fs = require("node:fs"); fs.writeFileSync("frontend/dist/version.json", JSON.stringify({ source_commit: fs.readFileSync("/tmp/mirror-source-revision", "utf8").trim(), built_at: new Date().toISOString() }) + "\n")'
+          uv sync --directory frontend --frozen
+          uv run --directory frontend python -m club_web.sync_changes --output ../data/changes.json --previous-published
+          uv run --directory frontend python -m club_web.mirror --output dist --base /club-pravo-hse-mirror/
+          python3 - <<'PY'
+          from datetime import UTC, datetime
+          import json
+          from pathlib import Path
+          revision = Path('/tmp/mirror-source-revision').read_text().strip()
+          data = {'source_commit': revision, 'built_at': datetime.now(UTC).isoformat().replace('+00:00', 'Z')}
+          Path('frontend/dist/version.json').write_text(json.dumps(data) + '\n')
+          PY
 
       - name: Setup Pages
         uses: actions/configure-pages@v6.0.0
