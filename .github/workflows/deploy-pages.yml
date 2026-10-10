@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout monorepo
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: Bogolubov-creator/hse-law-alumni-club
           ref: ${{ github.event.inputs.source_ref || 'main' }}
@@ -39,19 +39,21 @@ jobs:
           printf 'Source commit: `%s`\n' "$(cat /tmp/mirror-source-revision)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup Python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
-          python-version: "3.14.7"
+          python-version: "3.14.8"
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
         with:
-          version: "0.12.21"
+          version: "0.13.0"
 
       - name: Install and build mirror
         working-directory: src
         run: |
           uv sync --directory frontend --frozen
+          uv run --directory frontend playwright install --with-deps chromium
+          uv run --directory frontend pytest -q tests/python/test_browser.py -k 'mirror or office' --tb=short
           uv run --directory frontend python -m club_web.sync_changes --output ../data/changes.json --previous-published
           uv run --directory frontend python -m club_web.mirror --output dist --base /club-pravo-hse-mirror/
           python3 - <<'PY'
@@ -64,10 +66,10 @@ jobs:
           PY
 
       - name: Setup Pages
-        uses: actions/configure-pages@v6.0.0
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5.0.0
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: src/frontend/dist
           include-hidden-files: true
@@ -81,4 +83,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5.0.1
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346
